@@ -1,0 +1,14 @@
+# Do not push Daily Handson
+daily-handson/
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Enviro**ent/secrets
+.env
+**/.env
+
+# Logs
+**log
+npm-debug.log*

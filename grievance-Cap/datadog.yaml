@@ -1,0 +1,8 @@
+api_key: 3c09566c85aeeefb491439ff72289b54
+site: datadoghq.com
+
+logs_enabled: true
+process_config:
+  enabled: "true"
+apm_config:
+  enabled: true

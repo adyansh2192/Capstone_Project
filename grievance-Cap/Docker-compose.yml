@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  backend:
+    build: .
+    container_name: grievance-backend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/grievance-db
+      - DD_AGENT_HOST=datadog
+      - DD_TRACE_AGENT_PORT=8126
+      - DD_ENV=dev
+      - DD_SERVICE=grievance-portal
+      - DD_VERSION=1.0.0
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  datadog:
+    image: datadog/agent:latest   # ✅ Correct official Datadog Agent
+    container_name: datadog
+    environment:
+      - DD_API_KEY=3c09566c85aeeefb491439ff72289b54
+      - DD_SITE=datadoghq.com
+      - DD_LOGS_ENABLED=true
+      - DD_APM_ENABLED=true
+      - DD_PROCESS_AGENT_ENABLED=true
+      - DD_CONTAINER_COLLECT_ALL=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    ports:
+      - "8126:8126"   # ✅ Needed for APM traces
+      - "8125:8125/udp" # ✅ DogStatsD metrics
+
+volumes:
+  mongo-data:
